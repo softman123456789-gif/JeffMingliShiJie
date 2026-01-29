@@ -53,8 +53,9 @@ jobs:
         export ANDROID_HOME=/opt/android
         mkdir -p $ANDROID_HOME
         cd $ANDROID_HOME
-        wget -q https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
-        unzip -q commandlinetools-linux-11076708_latest.zip
+        # 下載舊版 commandlinetools（9477386，支援 Java 11）
+        wget -q https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
+        unzip -q commandlinetools-linux-9477386_latest.zip
         mkdir -p cmdline-tools/latest
         cd cmdline-tools
         mv -v * latest/ || true
