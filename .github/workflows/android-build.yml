@@ -59,8 +59,12 @@ jobs:
         cd cmdline-tools
         mv -v * latest/ || true
         cd latest
-        yes | bin/sdkmanager --licenses 2>&1 | head -20
-        bin/sdkmanager "platforms;android-31" "build-tools;31.0.0" "ndk;25.1.8937393" 2>&1 | head -100
+        # 接受所有許可證
+        mkdir -p ~/.android
+        echo "### Licenses" > ~/.android/repositories.cfg
+        for ((i=1; i<=50; i++)); do echo "y"; done | bin/sdkmanager --licenses 2>&1 | tail -20
+        # 安裝 SDK 組件
+        for ((i=1; i<=50; i++)); do echo "y"; done | bin/sdkmanager "platforms;android-31" "build-tools;31.0.0" "ndk;25.1.8937393" 2>&1 | tail -50
     
     - name: Build APK
       run: |
