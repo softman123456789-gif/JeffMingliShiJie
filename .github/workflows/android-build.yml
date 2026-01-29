@@ -57,14 +57,14 @@ jobs:
         JAVA_HOME: /usr/lib/jvm/java-11-openjdk-amd64
     
     - name: Upload APK to artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: jeff-mingli-debug
         path: bin/*.apk
     
     - name: Create Release
       if: startsWith(github.ref, 'refs/tags/')
-      uses: softprops/action-gh-release@v1
+      uses: softprops/action-gh-release@v2
       with:
         files: bin/*.apk
       env:
