@@ -71,3 +71,6 @@ android.locales = zh_TW
 
 # Log 級別
 log_level = 2
+android.build_tools_version
+=
+31.0.0
