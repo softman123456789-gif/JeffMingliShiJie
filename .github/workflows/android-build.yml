@@ -70,13 +70,14 @@ jobs:
       run: |
         echo "NDK_PATH=${HOME}/android-sdk/ndk/25.1.8937393" >> $GITHUB_ENV
 
-    - name: Ensure git symlink for buildozer
+    - name: Ensure git for buildozer
       run: |
-        if [ -x /usr/bin/git ] && [ ! -x /usr/local/bin/git ]; then sudo ln -s /usr/bin/git /usr/local/bin/git; fi
-        if [ -x /usr/local/bin/git ] && [ ! -x /usr/bin/git ]; then sudo ln -s /usr/local/bin/git /usr/bin/git; fi
-    which git
-    git --version
-    echo $PATH
+        sudo apt-get install --reinstall -y git
+        sudo ln -sf $(which git) /usr/bin/git
+        sudo ln -sf $(which git) /usr/local/bin/git
+        which git
+        git --version
+        echo $PATH
 
   - name: Build APK with Buildozer
       run: |
