@@ -59,12 +59,31 @@ jobs:
         cd cmdline-tools
         mv -v * latest/ || true
         cd latest
-        # 接受所有許可證
+        # 預先建立許可證文件
         mkdir -p ~/.android
-        echo "### Licenses" > ~/.android/repositories.cfg
-        for ((i=1; i<=50; i++)); do echo "y"; done | bin/sdkmanager --licenses 2>&1 | tail -20
-        # 安裝 SDK 組件
-        for ((i=1; i<=50; i++)); do echo "y"; done | bin/sdkmanager "platforms;android-31" "build-tools;31.0.0" "ndk;25.1.8937393" 2>&1 | tail -50
+        cat > ~/.android/repositories.cfg << 'EOF'
+        ### Licenses
+        EOF
+        # 直接寫入許可証
+        cat > ~/.android/repositories.cfg << 'EOF'
+        ### Licenses
+        android-sdk-license
+        EOF
+        # 使用 --licenses 參數接受
+        echo "Accepting licenses..."
+        bin/sdkmanager --sdk_root=/opt/android --licenses << 'LICENSE_ACCEPT'
+        y
+        y
+        y
+        y
+        y
+        y
+        y
+        y
+        LICENSE_ACCEPT
+        # 驗證安裝
+        echo "Installing SDK components..."
+        bin/sdkmanager --sdk_root=/opt/android --install "platforms;android-31" "build-tools;31.0.0" "ndk;25.1.8937393" 2>&1 | tail -50
     
     - name: Build APK
       run: |
