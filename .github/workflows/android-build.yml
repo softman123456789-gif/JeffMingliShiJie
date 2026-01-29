@@ -1,28 +1,21 @@
-name: Build Android APK
+name: Android Build
 
 on:
   push:
-    tags:
-      - 'v*'
-    branches:
-      - main
-      - master
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    
+    timeout-minutes: 90
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+    - uses: actions/checkout@v3
     
-    - name: Setup Java
-      uses: actions/setup-java@v4
-      with:
-        java-version: '11'
-        distribution: 'temurin'
-    
-    - name: Setup Python
+    - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: '3.10'
@@ -32,77 +25,112 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y \
           build-essential \
-          libssl-dev \
-          libffi-dev \
-          python3-dev \
-          cython3 \
-          libncurses6 \
-          libtinfo6 \
           git \
-          wget \
-          unzip
+          openjdk-11-jdk \
+          ant \
+          ccache \
+          libffi-dev \
+          libssl-dev \
+          libxml2-dev \
+          libxslt1-dev \
+          zlib1g-dev
     
-    - name: Install Python dependencies
+    - name: Install Python packages
       run: |
         python -m pip install --upgrade pip
-        pip install buildozer cython
-        pip install kivy pillow pyjnius
+        pip install buildozer cython virtualenv
     
-    - name: Setup Android SDK
+    - name: Set up Android SDK
       run: |
-        export ANDROID_HOME=/opt/android
-        mkdir -p $ANDROID_HOME
-        cd $ANDROID_HOME
-        # 下載舊版 commandlinetools（9477386，支援 Java 11）
+        mkdir -p ${HOME}/android-sdk
+        cd ${HOME}/android-sdk
         wget -q https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
         unzip -q commandlinetools-linux-9477386_latest.zip
+        rm commandlinetools-linux-9477386_latest.zip
         mkdir -p cmdline-tools/latest
-        cd cmdline-tools
-        mv -v * latest/ || true
-        cd latest
-        # 預先建立許可證文件
-        mkdir -p ~/.android
-        cat > ~/.android/repositories.cfg << 'EOF'
-        ### Licenses
-        EOF
-        # 直接寫入許可証
-        cat > ~/.android/repositories.cfg << 'EOF'
-        ### Licenses
-        android-sdk-license
-        EOF
-        # 使用 --licenses 參數接受
-        echo "Accepting licenses..."
-        bin/sdkmanager --sdk_root=/opt/android --licenses << 'LICENSE_ACCEPT'
-        y
-        y
-        y
-        y
-        y
-        y
-        y
-        y
-        LICENSE_ACCEPT
-        # 驗證安裝
-        echo "Installing SDK components..."
-        bin/sdkmanager --sdk_root=/opt/android --install "platforms;android-31" "build-tools;31.0.0" "ndk;25.1.8937393" 2>&1 | tail -50
+        mv cmdline-tools/* cmdline-tools/latest/ 2>/dev/null || true
     
-    - name: Build APK
+    - name: Set Android environment variables
+      run: |
+        echo "ANDROID_HOME=${HOME}/android-sdk" >> $GITHUB_ENV
+        echo "ANDROID_SDK_ROOT=${HOME}/android-sdk" >> $GITHUB_ENV
+        echo "${HOME}/android-sdk/cmdline-tools/latest/bin" >> $GITHUB_PATH
+        echo "${HOME}/android-sdk/platform-tools" >> $GITHUB_PATH
+    
+    - name: Accept Android licenses
+      run: |
+        yes | sdkmanager --licenses || true
+    
+    - name: Install Android SDK components
+      run: |
+        sdkmanager --no_https "platforms;android-31" \
+                   "build-tools;31.0.0" \
+                   "ndk;25.1.8937393"
+    
+    - name: Set NDK path
+      run: |
+        echo "NDK_PATH=${HOME}/android-sdk/ndk/25.1.8937393" >> $GITHUB_ENV
+    
+    - name: Build APK with Buildozer
       run: |
         buildozer android debug
       env:
-        ANDROID_HOME: /opt/android
-        JAVA_HOME: /usr/lib/jvm/temurin-11-jdk-amd64
+        ANDROID_SDK_ROOT: ${{ env.ANDROID_HOME }}
+        ANDROID_HOME: ${{ env.ANDROID_HOME }}
+        PATH: ${{ env.ANDROID_HOME }}/cmdline-tools/latest/bin:${{ env.ANDROID_HOME }}/platform-tools:$PATH
     
-    - name: Upload APK to artifacts
-      uses: actions/upload-artifact@v4
+    - name: List generated APKs
+      if: always()
+      run: |
+        find . -name "*.apk" -type f
+    
+    - name: Upload APK as artifact
+      if: success()
+      uses: actions/upload-artifact@v3
       with:
-        name: jeff-mingli-debug
+        name: apk-release
         path: bin/*.apk
+        retention-days: 30
     
     - name: Create Release
-      if: startsWith(github.ref, 'refs/tags/')
-      uses: softprops/action-gh-release@v2
-      with:
-        files: bin/*.apk
+      if: success()
+      id: create_release
+      uses: actions/create-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: release-${{ github.run_number }}
+        release_name: APK Release v6.7.3 Build #${{ github.run_number }}
+        body: |
+          Jeff 命理世界 v6.7.3 - Android APK
+          
+          編譯完成！
+          下載 APK 文件安裝到您的 Android 設備。
+          
+          功能：
+          - 星座運勢
+          - 八字分析
+          - 血型個性
+          - 九宮姓名
+          - 紫微星盤
+          - 塔羅牌
+          - 易經卦象
+          - 配偶相容性
+        draft: false
+        prerelease: false
+    
+    - name: Upload Release Assets
+      if: success()
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: bin/mingli-6.7.3-debug.apk
+        asset_name: mingli-6.7.3-debug.apk
+        asset_content_type: application/vnd.android.package-archive
+    
+    - name: Show build log
+      if: always()
+      run: |
+        tail -100 .buildozer/android/platform/build*/build/outputs/logs/*.txt 2>/dev/null || true
