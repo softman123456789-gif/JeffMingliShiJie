@@ -36,7 +36,11 @@ jobs:
           libffi-dev \
           python3-dev \
           cython3 \
-          libncurses5
+          libncurses6 \
+          libtinfo6 \
+          git \
+          wget \
+          unzip
     
     - name: Install Python dependencies
       run: |
