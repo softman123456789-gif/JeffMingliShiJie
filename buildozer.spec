@@ -1,73 +1,73 @@
-app]
+[app]
 
-# ?璅?
-title = Jeff?賜?銝?
+# 應用標題
+title = Jeff命理世界
 
-# 憟辣?迂嚗om.xxxx.yyyy ?澆?嚗?
+# 套件名稱（com.xxxx.yyyy 格式）
 package.name = jiuyin_destiny
 
-# 憟辣??
+# 套件域名
 package.domain = org.jiuyin
 
-# ??瑼?蝵?
+# 原始檔位置
 source.dir = .
 
-# ??瑼?蝬游?嚗ython 瑼?嚗?
+# 原始檔後綴名（Python 檔案）
 source.include_exts = py,png,jpg,kv,atlas
 
-# 閬??斤??桅?
+# 要排除的目錄
 source.exclude_dirs = tests, bin
 
-# ???
+# 版本號
 version = 6.7
 
-# ?瘙?Python 靘陷嚗?
+# 需求（Python 依賴）
 requirements = python3,kivy,pillow,pyjnius
 
-# ?孵?嚗ortrait=?游?, landscape=璈怠?, sensor=?芸?嚗?
+# 方向（portrait=直式, landscape=橫式, sensor=自動）
 orientation = portrait
 
-# ?Ｗ?撠箏站
+# 螢幕尺寸
 fullscreen = 1
 
-# Android API 蝑?
+# Android API 等級
 android.api = 31
 
-# Android ?撠?API 蝑?
+# Android 最小 API 等級
 android.minapi = 21
 
-# Android NDK ?
+# Android NDK 版本
 android.ndk = 25b
 
-# 閮勗甈身摰?
+# 許可權設定
 android.permissions = INTERNET,ACCESS_FINE_LOCATION,ACCESS_COARSE_LOCATION,WRITE_EXTERNAL_STORAGE,READ_EXTERNAL_STORAGE
 
-# ?閮剖?
+# 功能設定
 android.features = android.hardware.touchscreen
 
-# ???
+# 應用圖標
 #icon.filename = %(source.dir)s/data/icon.png
 
-# ???敶勗?
+# 應用啟動影像
 #presplash.filename = %(source.dir)s/data/presplash.png
 
-# 瘣餃?璅惜
+# 活動標籤
 android.activity_label = @string/app_name
 
-# ??格? API 蝑?
+# 應用目標 API 等級
 android.target_api = 31
 
-# 雿輻 legacy ???詨捆??
+# 使用 legacy 提高相容性
 android.gradle_dependencies = 
 
-# ?迂?遢
+# 允許備份
 android.allow_backup = True
 
-# ?嗆??舀嚗rmeabi-v7a, arm64-v8a, x86, x86_64嚗?
+# 架構支援（armeabi-v7a, arm64-v8a, x86, x86_64）
 android.archs = arm64-v8a
 
-# 隤?閮剖?
+# 語言設定
 android.locales = zh_TW
 
-# Log 蝝
+# Log 級別
 log_level = 2
