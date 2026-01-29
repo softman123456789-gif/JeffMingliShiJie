@@ -10,6 +10,150 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+  timeout-minutes: 90
+
+  steps:
+  - uses: actions/checkout@v3
+
+  - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          build-essential \
+          git \
+          openjdk-11-jdk \
+          ant \
+          ccache \
+          libffi-dev \
+          libssl-dev \
+          libxml2-dev \
+          libxslt1-dev \
+          zlib1g-dev
+
+    - name: Install Python packages
+      run: |
+        python -m pip install --upgrade pip
+    pip install buildozer cython virtualenv
+
+  - name: Set up Android SDK
+      run: |
+        mkdir -p ${HOME}/android-sdk
+        cd ${HOME}/android-sdk
+  wget -q https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
+  unzip -q commandlinetools-linux-9477386_latest.zip
+  rm commandlinetools-linux-9477386_latest.zip
+    mkdir -p cmdline-tools/latest
+    mv cmdline-tools/* cmdline-tools/latest/ 2>/dev/null || true
+
+  - name: Set Android environment variables
+      run: |
+        echo "ANDROID_HOME=${HOME}/android-sdk" >> $GITHUB_ENV
+        echo "ANDROID_SDK_ROOT=${HOME}/android-sdk" >> $GITHUB_ENV
+    echo "${HOME}/android-sdk/cmdline-tools/latest/bin" >> $GITHUB_PATH
+    echo "${HOME}/android-sdk/platform-tools" >> $GITHUB_PATH
+
+  - name: Accept Android licenses
+      run: |
+        yes | sdkmanager --licenses || true
+
+    - name: Install Android SDK components
+      run: |
+        sdkmanager --no_https "platforms;android-31" \
+                   "build-tools;31.0.0" \
+                   "ndk;25.1.8937393"
+
+    - name: Set NDK path
+      run: |
+        echo "NDK_PATH=${HOME}/android-sdk/ndk/25.1.8937393" >> $GITHUB_ENV
+
+    - name: Ensure git symlink for buildozer
+      run: |
+        if [ -x /usr/bin/git ] && [ ! -x /usr/local/bin/git ]; then sudo ln -s /usr/bin/git /usr/local/bin/git; fi
+        if [ -x /usr/local/bin/git ] && [ ! -x /usr/bin/git ]; then sudo ln -s /usr/local/bin/git /usr/bin/git; fi
+    which git
+    git --version
+    echo $PATH
+
+  - name: Build APK with Buildozer
+      run: |
+        export PATH=/usr/bin:/usr/local/bin:$PATH
+        buildozer android debug
+      env:
+        ANDROID_SDK_ROOT: ${{ env.ANDROID_HOME }}
+        ANDROID_HOME: ${{ env.ANDROID_HOME }}
+    PATH: /usr/bin:/usr/local/bin:${{ env.ANDROID_HOME }}/cmdline-tools/latest/bin:${{ env.ANDROID_HOME }}/platform-tools:$PATH
+
+  - name: List generated APKs
+      if: always()
+      run: |
+        find . -name "*.apk" -type f
+
+    - name: Upload APK as artifact
+  if: success()
+  uses: actions/upload-artifact@v4
+  with:
+    name: apk-release
+    path: bin/*.apk
+    retention-days: 30
+
+  - name: Create Release
+  if: success()
+  id: create_release
+  uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+  tag_name: release-${{ github.run_number }}
+  release_name: APK Release v6.7.3 Build #${{ github.run_number }}
+  body: |
+          Jeff 命理世界 v6.7.3 - Android APK
+          
+          編譯完成！
+          下載 APK 文件安裝到您的 Android 設備。
+          
+          功能：
+          - 星座運勢
+          - 八字分析
+          - 血型個性
+          - 九宮姓名
+          - 紫微星盤
+          - 塔羅牌
+          - 易經卦象
+          - 配偶相容性
+        draft: false
+    prerelease: false
+
+  - name: Upload Release Assets
+  if: success()
+  uses: actions/upload-release-asset@v1
+  env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+    asset_path: bin/mingli-6.7.3-debug.apk
+    asset_name: mingli-6.7.3-debug.apk
+    asset_content_type: application/vnd.android.package-archive
+
+  - name: Show build log
+      if: always()
+      run: |
+        tail -100 .buildozer/android/platform/build*/build/outputs/logs/*.txt 2>/dev/null || true
+name: Android Build
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
     timeout-minutes: 90
 
     steps:
@@ -86,7 +230,7 @@ jobs:
     
     - name: Upload APK as artifact
       if: success()
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v3
       with:
         name: apk-release
         path: bin/*.apk
