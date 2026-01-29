@@ -56,9 +56,11 @@ jobs:
         wget -q https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
         unzip -q commandlinetools-linux-11076708_latest.zip
         mkdir -p cmdline-tools/latest
-        mv cmdline-tools/* cmdline-tools/latest/
-        yes | cmdline-tools/latest/bin/sdkmanager --licenses
-        cmdline-tools/latest/bin/sdkmanager "platforms;android-31" "build-tools;31.0.0" "ndk;25.1.8937393"
+        cd cmdline-tools
+        mv -v * latest/ || true
+        cd latest
+        yes | bin/sdkmanager --licenses 2>&1 | head -20
+        bin/sdkmanager "platforms;android-31" "build-tools;31.0.0" "ndk;25.1.8937393" 2>&1 | head -100
     
     - name: Build APK
       run: |
