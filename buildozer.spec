@@ -1,4 +1,4 @@
-﻿[app]
+app]
 
 # ?璅?
 title = Jeff?賜?銝?
@@ -53,8 +53,6 @@ android.features = android.hardware.touchscreen
 
 # 瘣餃?璅惜
 android.activity_label = @string/app_name
-
-# ?甈?
 
 # ??格? API 蝑?
 android.target_api = 31
