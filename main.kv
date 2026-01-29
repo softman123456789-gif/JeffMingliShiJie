@@ -1,0 +1,103 @@
+#:kivy 2.0
+
+<MainScreen>:
+    FloatLayout:
+        canvas.before:
+            Color:
+                rgba: 0.1, 0.1, 0.15, 1
+            Rectangle:
+                size: self.size
+                pos: self.pos
+        
+        # 標題區
+        BoxLayout:
+            orientation: 'vertical'
+            size_hint: 1, 0.15
+            pos_hint: {'x': 0, 'y': 0.85}
+            
+            Label:
+                text: '[b]Jeff命理世界[/b]'
+                font_size: '32sp'
+                markup: True
+                color: 0.8, 0.6, 0.2, 1  # 金色
+            
+            Label:
+                text: '命理分析系統 v6.7'
+                font_size: '14sp'
+                color: 0.7, 0.7, 0.7, 1
+        
+        # 功能區
+        ScrollView:
+            size_hint: 1, 0.7
+            pos_hint: {'x': 0, 'y': 0.15}
+            
+            GridLayout:
+                cols: 2
+                spacing: '10dp'
+                padding: '10dp'
+                size_hint_y: None
+                height: self.minimum_height
+                
+                MenuButton:
+                    text: '九宮分析'
+                    icon: '🔢'
+                
+                MenuButton:
+                    text: '星座分析'
+                    icon: '⭐'
+                
+                MenuButton:
+                    text: '八字分析'
+                    icon: '📅'
+                
+                MenuButton:
+                    text: '紫微分析'
+                    icon: '👑'
+                
+                MenuButton:
+                    text: '塔羅牌'
+                    icon: '🃏'
+                
+                MenuButton:
+                    text: '周易卜卦'
+                    icon: '☯️'
+                
+                MenuButton:
+                    text: '配偶合適性'
+                    icon: '💑'
+                
+                MenuButton:
+                    text: '名字分析'
+                    icon: '📝'
+        
+        # 底部控制區
+        BoxLayout:
+            orientation: 'horizontal'
+            size_hint: 1, 0.15
+            pos_hint: {'x': 0, 'y': 0}
+            spacing: '10dp'
+            padding: '10dp'
+            
+            Button:
+                text: '清除結果'
+                size_hint: 0.5, 1
+                background_color: 0.3, 0.3, 0.4, 1
+            
+            Button:
+                text: '設定'
+                size_hint: 0.5, 1
+                background_color: 0.3, 0.3, 0.4, 1
+
+
+<MenuButton@Button>:
+    icon: ''
+    size_hint_y: None
+    height: '100dp'
+    background_color: 0.2, 0.2, 0.3, 1
+    
+    Label:
+        text: self.parent.icon + '\n' + self.parent.text
+        text_size: self.width - 10, self.height - 10
+        halign: 'center'
+        valign: 'center'
+        font_size: '18sp'
