@@ -58,7 +58,7 @@ android.activity_label = @string/app_name
 android.target_api = 31
 
 # 使用 legacy 提高相容性
-android.gradle_dependencies = 
+#android.gradle_dependencies =
 
 # 允許備份
 android.allow_backup = True
@@ -71,6 +71,3 @@ android.locales = zh_TW
 
 # Log 級別
 log_level = 2
-android.build_tools_version
-=
-31.0.0
